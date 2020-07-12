@@ -7,11 +7,7 @@ export default class ColumnChart {
     label = '',
     value = 0,
     link = null}) {
-    this.data = data;
-    this.label = label;
-    this.value = value;
-    this.link = link;
-    return this.createHTMLScheme(this.data, this.label, this.value, this.link);
+    return this.createHTMLScheme(data, label, value, link);
   }
   update = ({data}) => {
     this.data = data;
