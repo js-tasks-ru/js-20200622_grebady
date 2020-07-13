@@ -1,71 +1,74 @@
 export default class ColumnChart {
-  element = null;
-  columns = null;
+  element; // HTMLElement;
+  columns;
   chartHeight = 50;
+
   constructor({
     data = [],
     label = '',
     value = 0,
-    link = null}) {
-    return this.createHTMLScheme(data, label, value, link);
-  }
-  update = ({data}) => {
+    link = '',
+  }) {
     this.data = data;
-    const newColumnChartChart = document.createElement('div');
-    newColumnChartChart.classList.add('column-chart__chart');
-    newColumnChartChart.dataset.v = 'body';
-    for (const valueOfColumn of this.data) {
-      const column = document.createElement('div');
-      column.style.cssText = `--value: ${valueOfColumn}`;
-      newColumnChartChart.append(column);
-    }
-    this.columns.replaceWith(newColumnChartChart);
+    this.label = label;
+    this.value = value;
+    this.link = link;
+    this.render();
+    this.initEventListeners();
   }
-  createHTMLScheme = (data, label, value, link)=>{
-    const columnСhart = document.createElement('div');
-    columnСhart.classList.add('column-chart');
-    columnСhart.style.cssText = '--chart-height: 50';
 
-    const columnChartTitle = document.createElement('div');
-    columnChartTitle.classList.add('column-chart__title');
-    columnChartTitle.innerHTML = `Total ${label}`;
-    columnСhart.append(columnChartTitle);
-    const columnChartLink = document.createElement('a');
-    columnChartLink.classList.add('column-chart__link');
-    columnChartLink.innerHTML = 'View all';
-    columnChartLink.href = `${link}`;
-    columnChartTitle.append(columnChartLink);
+  initEventListeners() {}
 
-
-    const columnChartContainer = document.createElement('div');
-    columnChartContainer.classList.add('column-chart__container');
-    columnСhart.append(columnChartContainer);
-    const columnChartHeader = document.createElement('div');
-    columnChartHeader.classList.add('column-chart__header');
-    columnChartHeader.innerHTML = `${value}`;
-    columnChartHeader.dataset.element = 'header';
-    columnChartContainer.append(columnChartHeader);
-    const columnChartChart = document.createElement('div');
-    columnChartChart.classList.add('column-chart__chart');
-    columnChartChart.dataset.v = 'body';
-    columnChartContainer.append(columnChartChart);
-    if (data.length === 0) {
-      columnСhart.classList.add('column-chart_loading');
-      const skeleton = document.createElement('img');
-      skeleton.src = 'charts-skeleton.svg';
-      columnChartChart.append(skeleton);
-    } else {
-      columnChartContainer.classList.remove("&::before");
-      for (const valueOfColumn of data) {
-        const column = document.createElement('div');
-        column.style.cssText = `--value: ${valueOfColumn}`;
-        columnChartChart.append(column);
-      }
-    }
-    this.columns = columnChartChart;
-    this.element = columnСhart;
+  render() {
+    this.element = this.templateAndInitColumns;
+    this.update();
   }
-  destroy = ()=> this.element.remove();
-  remove = () => this.element.remove();
+  get templateAndInitColumns() {
+    const div = document.createElement('div');
+    div.innerHTML = `
+    <div class="column-chart ${(this.data.length === 0) ? 'column-chart_loading' : ''}" style="--chart-height: ${this.chartHeight}">
+      <div class="column-chart__title">
+        Total ${this.label}
+        ${ (this.link) ? `<a class="column-chart__link" href="${this.link}">View all</a>` : ''}
+      </div>
+      <div class="column-chart__container">
+        <div data-element="header" class="column-chart__header">
+          ${this.value}
+        </div>
+        <div data-element="body" class="column-chart__chart">
 
+        </div>
+      </div>
+    </div>
+    `;
+    this.columns = div.querySelector('.column-chart__chart');
+    return div.firstElementChild;
+  }
+  update(data = this.data) {
+    const maxValue = Math.max(...data);
+    const scale = this.chartHeight / maxValue;
+
+    this.columns.innerHTML = '';
+    for (const columnHeight of data) {
+      const value = Math.floor(columnHeight * scale);
+      const percent = (columnHeight / maxValue * 100).toFixed(0);
+      this.columns.innerHTML +=
+        `<div style="--value:${value}" data-tooltip="${percent}%"></div>`;
+    }
+  }
+
+  remove () {
+    this.element.remove();
+  }
+
+  destroy() {
+    this.columns = null;
+    this.element.remove();
+    // additionally needed to remove all listeners...
+  }
 }
+
+// const defaultComponent = new DefaultComponent();
+// const element = document.getElementById('root');
+//
+// element.append(defaultComponent.element);
