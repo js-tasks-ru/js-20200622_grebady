@@ -8,7 +8,7 @@ export default class ColumnChart {
     label = '',
     value = 0,
     link = '',
-  }) {
+  } = {}) {
     this.data = data;
     this.label = label;
     this.value = value;
@@ -44,7 +44,8 @@ export default class ColumnChart {
     this.columns = div.querySelector('.column-chart__chart');
     return div.firstElementChild;
   }
-  update(data = this.data) {
+  update({data} = {}) {
+    if (data === undefined) {data = this.data;}
     const maxValue = Math.max(...data);
     const scale = this.chartHeight / maxValue;
 
