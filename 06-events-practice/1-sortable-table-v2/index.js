@@ -4,35 +4,31 @@ export default class SortableTable {
   headersConfig = [];
   data = [];
 
-  sortByClick = (event)=>{
-    if (event.target.closest('.sortable-table__cell').dataset.sortable === 'true') {
-      const column = event.target.closest('.sortable-table__cell');
-      const field = column.dataset.id;
+  sortByClick = event =>{
+    const column = event.target.closest('.sortable-table__cell');
+    if (event.target.closest('[data-sortable="true"]')) {
 
-      switch (column.dataset.order) {
-      case 'asc':
-        this.sort(field, 'desc');
-        break;
-      case 'desc':
-        this.sort(field, 'asc');
-        break;
-      default:
-        this.sort(field, 'asc');
-        break;
-      }
+      const field = column.dataset.id;
+      const sortedData = (column.dataset.order) === 'desc' ? this.sort(field, 'asc') : this.sort(field, 'desc');
+      // this.subElements.innerHTML = this.getTableRows(sortedData);
     }
   }
-
   constructor(headersConfig, {
-    data = []
-  } = {}) {
+    data = [],
+    sorted = {
+      id: headersConfig.find(item => item.sortable).id,
+      order: 'desc',
+    }
+  } = {},
+  ) {
     this.headersConfig = headersConfig;
     this.data = data;
+    this.sorted = sorted;
     this.render();
   }
 
   initEventListeners() {
-    document.addEventListener('pointerdown', this.sortByClick);
+    this.subElements.header.addEventListener('pointerdown', this.sortByClick);
   }
 
   get tableHeader() {
@@ -96,8 +92,9 @@ export default class SortableTable {
     const $wrapper = document.createElement('div');
     $wrapper.innerHTML = this.getTable(this.data);
     this.element = $wrapper.firstElementChild;
-    this.initEventListeners();
     this.subElements = this.getSubElements(this.element);
+    this.initEventListeners();
+    this.sort(this.sorted.id, this.sorted.order);
   }
 
   getSubElements(element) {
@@ -158,6 +155,7 @@ export default class SortableTable {
 
   destroy() {
     this.remove();
+    document.removeEventListener('mousedown', this.sortByClick);
     this.subElements = {};
   }
 }
