@@ -28,6 +28,8 @@ export default class DoubleSlider {
       this.leftBoundary = this.sliderLeft;
       this.rightBoundary = this.rightThumb.getBoundingClientRect().left - this.sliderLeft;
       this.dragging = this.leftThumb;
+      const { right } = this.dragging.getBoundingClientRect();
+      this.shiftX = right - event.clientX;
       this.element.classList.add('range-slider_dragging');
       document.addEventListener('pointermove', this.onMouseMove);
       document.addEventListener('pointerup', this.onMouseUp);
@@ -38,6 +40,8 @@ export default class DoubleSlider {
       this.rightBoundary = this.sliderWidth;
       this.leftBoundary = this.leftThumb.getBoundingClientRect().right - this.sliderLeft;
       this.dragging = this.rightThumb;
+      const { left } = this.dragging.getBoundingClientRect();
+      this.shiftX = left - event.clientX;
       this.element.classList.add('range-slider_dragging');
       document.addEventListener('pointermove', this.onMouseMove);
       document.addEventListener('pointerup', this.onMouseUp);
@@ -46,8 +50,7 @@ export default class DoubleSlider {
   onMouseMove = event => {
     if (this.dragging === this.leftThumb) {
       const { clientX } = event;
-      let shiftX = event.clientX - this.dragging.getBoundingClientRect().left;
-      let newLeft = clientX - this.leftBoundary + shiftX;
+      let newLeft = clientX - this.leftBoundary + this.shiftX;
 
       if (newLeft < 0) {
         newLeft = 0;
@@ -63,8 +66,7 @@ export default class DoubleSlider {
       this.spanFrom.innerHTML = this.formatValue(this.selected.from);
     } else {
       const { clientX } = event;
-      let shiftX = event.clientX - this.dragging.getBoundingClientRect().left;
-      let newLeft = clientX - this.sliderLeft + shiftX;
+      let newLeft = clientX - this.sliderLeft + this.shiftX;
 
       // курсор вышел из слайдера => оставить бегунок в его границах.
       if (newLeft < this.leftBoundary) {
