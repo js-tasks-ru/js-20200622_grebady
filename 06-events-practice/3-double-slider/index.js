@@ -46,7 +46,8 @@ export default class DoubleSlider {
   onMouseMove = event => {
     if (this.dragging === this.leftThumb) {
       const { clientX } = event;
-      let newLeft = clientX - this.leftBoundary;
+      let shiftX = event.clientX - this.dragging.getBoundingClientRect().left;
+      let newLeft = clientX - this.leftBoundary + shiftX;
 
       if (newLeft < 0) {
         newLeft = 0;
@@ -62,7 +63,8 @@ export default class DoubleSlider {
       this.spanFrom.innerHTML = this.formatValue(this.selected.from);
     } else {
       const { clientX } = event;
-      let newLeft = clientX - this.sliderLeft;
+      let shiftX = event.clientX - this.dragging.getBoundingClientRect().left;
+      let newLeft = clientX - this.sliderLeft + shiftX;
 
       // курсор вышел из слайдера => оставить бегунок в его границах.
       if (newLeft < this.leftBoundary) {
