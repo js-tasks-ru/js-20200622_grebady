@@ -1,8 +1,7 @@
-// Работающий tooltip
-
 class Tooltip {
   element;
-  static instance = null;
+  static instance;
+
   addTooltip = event => {
     const element = event.target.closest('[data-tooltip]');
     if (element) {
@@ -12,45 +11,43 @@ class Tooltip {
     }
   }
   onMoveTooltip = event => {
-    const left = event.clientX;
-    const top = event.clientY;
-    Tooltip.instance.style.left = `${left}px`;
-    Tooltip.instance.style.top = `${top}px`;
+    const left = event.clientX + 10;
+    const top = event.clientY + 10;
+    this.element.style.left = `${left}px`;
+    this.element.style.top = `${top}px`;
   }
-  onPoinerOut = event => {
+  onPointerOut = event => {
     this.remove();
-    document.removeEventListener('pointermove', this.onMoveTooltip);
   }
-
 
   constructor() {
     if (Tooltip.instance) {
       return Tooltip.instance;
     }
-  }
 
+    Tooltip.instance = this;
+  }
   render(html) {
-    const div = document.createElement('div');
-    div.innerHTML = `<div class="tooltip">${html}</div>`;
-    this.element = div.firstElementChild;
-    Tooltip.instance = div.firstElementChild;
-    document.body.append(Tooltip.instance);
+    this.element = document.createElement('div');
+    this.element.className = "tooltip";
+    this.element.innerHTML = html;
+    document.body.append(this.element);
   }
-
   initialize() {
     document.addEventListener("pointerover", this.addTooltip);
-    document.addEventListener("pointerout", this.onPoinerOut);
+    document.addEventListener("pointerout", this.onPointerOut);
   }
-  remove () {
-    if (Tooltip.instance) {
-      Tooltip.instance.remove();
-      Tooltip.instance = null;
+
+  remove() {
+    if (this.element) {
+      this.element.remove();
       this.element = null;
+      document.removeEventListener('pointermove', this.onMoveTooltip);
     }
   }
   destroy() {
     document.removeEventListener('pointerover', this.addTooltip);
-    document.removeEventListener('pointerout', this.onPoinerOut);
+    document.removeEventListener('pointerout', this.onPointerOut);
     this.remove();
   }
 }

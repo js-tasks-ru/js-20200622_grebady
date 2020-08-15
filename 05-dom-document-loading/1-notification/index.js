@@ -34,21 +34,18 @@ export default class NotificationMessage {
 
   render() {
     this.element = this.template;
-    // this.element.textContent = this.element.textContent.trim();
   }
   show(parentElement = document.body) {
     parentElement.append(this.element);
-    this.idTimer = setTimeout(() => this.remove(), this.duration);
+    setTimeout(() => this.remove(), this.duration);
     NotificationMessage.previousElement = this.element;
   }
 
   remove () {
     this.element.remove();
-    NotificationMessage.previousElement = null;
   }
 
   destroy () {
     this.element.remove();
-    NotificationMessage.previousElement = null;
   }
 }
