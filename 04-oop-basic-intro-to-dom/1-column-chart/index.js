@@ -14,10 +14,7 @@ export default class ColumnChart {
     this.value = value;
     this.link = link;
     this.render();
-    this.initEventListeners();
   }
-
-  initEventListeners() {}
 
   render() {
     this.element = this.templateAndInitColumns;
@@ -50,12 +47,13 @@ export default class ColumnChart {
     const scale = this.chartHeight / maxValue;
 
     this.columns.innerHTML = '';
+    let divs = '';
     for (const columnHeight of data) {
       const value = Math.floor(columnHeight * scale);
       const percent = (columnHeight / maxValue * 100).toFixed(0);
-      this.columns.innerHTML +=
-        `<div style="--value:${value}" data-tooltip="${percent}%"></div>`;
+      divs += `<div style="--value:${value}" data-tooltip="${percent}%"></div>`;
     }
+    this.columns.innerHTML = divs;
   }
 
   remove () {
@@ -65,11 +63,7 @@ export default class ColumnChart {
   destroy() {
     this.columns = null;
     this.element.remove();
-    // additionally needed to remove all listeners...
   }
 }
 
-// const defaultComponent = new DefaultComponent();
-// const element = document.getElementById('root');
-//
-// element.append(defaultComponent.element);
+
