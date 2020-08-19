@@ -15,8 +15,7 @@ export default class DoubleSlider {
   formatValue; //function
   selected;
 
-  leftBoundary;
-  rightBoundary;
+
 
 
   onMouseDown = event => {
@@ -25,8 +24,6 @@ export default class DoubleSlider {
 
     let leftThumbFromEvent = event.target.closest('.range-slider__thumb-left');
     if (leftThumbFromEvent === this.leftThumb) {
-      this.leftBoundary = this.sliderLeft;
-      this.rightBoundary = this.rightThumb.getBoundingClientRect().left - this.sliderLeft;
       this.dragging = this.leftThumb;
       const { right } = this.dragging.getBoundingClientRect();
       this.shiftX = right - event.clientX;
@@ -37,8 +34,6 @@ export default class DoubleSlider {
 
     let rightThumbFromEvent = event.target.closest('.range-slider__thumb-right');
     if (rightThumbFromEvent) {
-      this.rightBoundary = this.sliderWidth;
-      this.leftBoundary = this.leftThumb.getBoundingClientRect().right - this.sliderLeft;
       this.dragging = this.rightThumb;
       const { left } = this.dragging.getBoundingClientRect();
       this.shiftX = left - event.clientX;
@@ -48,38 +43,47 @@ export default class DoubleSlider {
     }
   };
   onMouseMove = event => {
+
     if (this.dragging === this.leftThumb) {
-      const { clientX } = event;
-      let newLeft = clientX - this.leftBoundary + this.shiftX;
+      let newLeft = (event.clientX - this.sliderLeft + this.shiftX) / this.sliderWidth;
 
       if (newLeft < 0) {
         newLeft = 0;
       }
+      newLeft *= 100;
+      let right = parseFloat(this.rightThumb.style.right);
 
-      if (newLeft > this.rightBoundary) {
-        newLeft = this.rightBoundary;
+      if (newLeft + right > 100) {
+        newLeft = 100 - right;
       }
-      let newLeftPercent = newLeft / this.sliderWidth * 100;
-      this.dragging.style.left = `${newLeftPercent}%`;
-      this.sliderProgress.style.left = `${newLeftPercent}%`;
-      this.selected.from = Math.round(this.min + ((this.max - this.min) * newLeftPercent) / 100);
+
+      this.dragging.style.left = `${newLeft}%`;
+      this.sliderProgress.style.left = `${newLeft}%`;
+      const rangeTotal = this.max - this.min;
+      this.selected.from = Math.round(this.min + (rangeTotal * newLeft) / 100);
       this.spanFrom.innerHTML = this.formatValue(this.selected.from);
-    } else {
-      const { clientX } = event;
-      let newLeft = clientX - this.sliderLeft + this.shiftX;
+    }
 
-      // курсор вышел из слайдера => оставить бегунок в его границах.
-      if (newLeft < this.leftBoundary) {
-        newLeft = this.leftBoundary;
+
+    if (this.dragging === this.rightThumb) {
+
+      let newRight = (this.sliderRight - event.clientX - this.shiftX) / this.sliderWidth;
+
+      if (newRight < 0) {
+        newRight = 0;
+      }
+      newRight *= 100;
+
+      let left = parseFloat(this.leftThumb.style.left);
+
+      if (left + newRight > 100) {
+        newRight = 100 - left;
       }
 
-      if (newLeft > this.sliderWidth) {
-        newLeft = this.sliderWidth;
-      }
-      let newRightPercent = 100 - (newLeft / this.sliderWidth * 100);
-      this.dragging.style.right = `${newRightPercent}%`;
-      this.sliderProgress.style.right = `${newRightPercent}%`;
-      this.selected.to = Math.round(this.min + ((this.max - this.min) * (100 - newRightPercent)) / 100);
+      this.dragging.style.right = `${newRight}%`;
+      this.sliderProgress.style.right = `${newRight}%`;
+      const rangeTotal = this.max - this.min;
+      this.selected.to = Math.round(this.min + (rangeTotal * (100 - newRight)) / 100);
       this.spanTo.innerHTML = this.formatValue(this.selected.to);
     }
   };
@@ -125,6 +129,7 @@ export default class DoubleSlider {
   getInitialPosition() {
     this.sliderInner = this.element.querySelector('.range-slider__inner');
     this.sliderLeft = this.sliderInner.getBoundingClientRect().left;
+    this.sliderRight = this.sliderInner.getBoundingClientRect().right;
     this.sliderWidth = this.sliderInner.getBoundingClientRect().width;
     this.sliderProgress = this.element.querySelector('.range-slider__progress');
     this.spanFrom = this.element.querySelector('[data-element="from"]');
@@ -133,22 +138,26 @@ export default class DoubleSlider {
 
   render() {
     const element = document.createElement('div');
-    const left = (this.selected.from - this.min) / (this.max - this.min) * 100;
-    const right = (this.max - this.selected.to) / (this.max - this.min) * 100;
+    const rangeTotal = this.max - this.min;
+    const left = Math.floor((this.selected.from - this.min) / (rangeTotal) * 100);
+    const right = Math.floor((this.max - this.selected.to) / (rangeTotal) * 100);
+
+    const {from, to} = this.selected;
 
     element.innerHTML = `
       <div class="range-slider">
-        <span data-element="from">${this.formatValue(this.selected.from)}</span>
-        <div class="range-slider__inner">
-          <span class="range-slider__progress" style="left: ${left}%; right: ${right}%"></span>
-          <span class="range-slider__thumb-left" style="left: ${left}%"></span>
-          <span class="range-slider__thumb-right" style="right: ${right}%"></span>
+        <span data-element="from">${this.formatValue(from)}</span>
+        <div data-element="inner" class="range-slider__inner">
+          <span data-element="progress" class="range-slider__progress" style="left: ${left}%; right: ${right}%"></span>
+          <span data-element="thumbLeft" class="range-slider__thumb-left" style="left: ${left}%"></span>
+          <span data-element="thumbRight" class="range-slider__thumb-right" style="right: ${right}%"></span>
         </div>
-        <span data-element="to">${this.formatValue(this.selected.to)}</span>
+        <span data-element="to">${this.formatValue(to)}</span>
       </div>
     `;
 
     this.element = element.firstElementChild;
+    this.element.ondragstart = () => false;
     this.leftThumb = this.element.querySelector('.range-slider__thumb-left');
     this.rightThumb = this.element.querySelector('.range-slider__thumb-right');
   }
