@@ -5,22 +5,20 @@ export default class SortableTable {
   data = [];
   sorted = {};
 
-
   sortByClick = event =>{
     const column = event.target.closest('[data-sortable="true"]');
 
-    if (column) {
-      const { id, order } = column.dataset;
-      const sortingOrder = order === 'asc' ? 'desc' : 'asc';
-      const sortedData = this.sortData(id, sortingOrder);
-      const arrow = column.querySelector('.sortable-table__sort-arrow');
-      column.dataset.order = sortingOrder;
-      if (!arrow) {
-        column.append(this.subElements.arrow);
-      }
-      this.subElements.body.innerHTML = this.getTableRows(sortedData);
-    }
+    if (!column) {return;}
+
+    const { id, order } = column.dataset;
+    const sortingOrder = order === 'asc' ? 'desc' : 'asc';
+    const sortedData = this.sortData(id, sortingOrder);
+    column.dataset.order = sortingOrder;
+    column.append(this.subElements.arrow);
+    this.subElements.body.innerHTML = this.getTableRows(sortedData);
   }
+
+
   constructor(headersConfig, {
     data = [],
     sorted = {
@@ -81,10 +79,10 @@ export default class SortableTable {
 
   get tableHeader() {
     return `<div data-element="header" class="sortable-table__header sortable-table__row">
-          ${this.headersConfig.map(item => this.getCellForHeaderRow(item)).join('')}</div>`;
+          ${this.headersConfig.map(item => this.getCellForHeaderColumn(item)).join('')}</div>`;
   }
 
-  getCellForHeaderRow({id, title, sortable}) {
+  getCellForHeaderColumn({id, title, sortable}) {
     const order = (this.sorted.id === id) ? this.sorted.order : 'asc';
     return `<div class="sortable-table__cell" data-id="${id}" data-sortable="${sortable}" ${(sortable) ? `data-order="${order}"` : ""}>
             <span>${title}</span>

@@ -77,24 +77,16 @@ export default class SortableTable {
    this.subElements = this.getSubElements(this.element);
  }
 
+
  getSubElements(element) {
    const elements = element.querySelectorAll('[data-element]');
-   let accum = {};
-   for (let i = 0; i < elements.length; i++) {
-     accum[elements[i].dataset.element] = elements[i];
-   }
-   return accum;
- }
 
- // getSubElements(element) {
- //   const elements = element.querySelectorAll('[data-element]');
- //
- //   return [...elements].reduce((accum, subElement) => {
- //     accum[subElement.dataset.element] = subElement;
- //
- //     return accum;
- //   }, {});
- // }
+   return [...elements].reduce((accum, subElement) => {
+     accum[subElement.dataset.element] = subElement;
+
+     return accum;
+   }, {});
+ }
 
  sort(field, order) {
    const sortedData = this.sortData(field, order);

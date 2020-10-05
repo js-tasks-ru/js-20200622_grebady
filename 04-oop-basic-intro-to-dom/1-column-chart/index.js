@@ -21,8 +21,8 @@ export default class ColumnChart {
     this.update();
   }
   get templateAndInitColumns() {
-    const div = document.createElement('div');
-    div.innerHTML = `
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
     <div class="column-chart ${(this.data.length === 0) ? 'column-chart_loading' : ''}" style="--chart-height: ${this.chartHeight}">
       <div class="column-chart__title">
         Total ${this.label}
@@ -38,8 +38,8 @@ export default class ColumnChart {
       </div>
     </div>
     `;
-    this.columns = div.querySelector('.column-chart__chart');
-    return div.firstElementChild;
+    this.columns = wrapper.querySelector('.column-chart__chart');
+    return wrapper.firstElementChild;
   }
   update({data} = {}) {
     if (data === undefined) {data = this.data;}
