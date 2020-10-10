@@ -51,12 +51,10 @@ export default class ColumnChart {
   async update(from = Date.now() - Date.now().setMonth(Date.now().getMonth() - 1), to = Date.now()) {
     this.element.classList.add('column-chart_loading');
     try {
-      const response = await fetch(`https://course-js.javascript.ru/${this.url}?from=${from}&to=${to},`, {
-        method: 'GET',
-      });
+      const response = await fetch(`https://course-js.javascript.ru/${this.url}?from=${from}&to=${to},`);
       this.dataJson = await response.json();
     } catch (error) {
-      console.warn(`Проблема с запросом на сервер: https://course-js.javascript.ru/${this.url}?from=${this.from}&to=${this.to}`);
+      //console.warn(`Проблема с запросом на сервер: https://course-js.javascript.ru/${this.url}?from=${this.from}&to=${this.to}`);
     }
     const data = Object.values(this.dataJson);
     const maxValue = Math.max(...data);
