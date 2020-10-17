@@ -424,6 +424,14 @@ body {
   transition: 0.2s all;
   text-decoration: none;
 }
+button.is-loading {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.5;
+  overflow: hidden;
+  text-indent: -9999px;
+  position: relative;
+}
 
 .button-primary {
   color: var(--white);

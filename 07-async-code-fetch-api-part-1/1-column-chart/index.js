@@ -1,3 +1,5 @@
+import fetchJson from './utils/fetch-json.js';
+const BACKEND_URL = 'https://course-js.javascript.ru';
 export default class ColumnChart {
   element; // HTMLElement;
   subElements; //HTMLElements;
@@ -14,7 +16,7 @@ export default class ColumnChart {
     link = '',
     formatHeading = data => data,
   } = {}) {
-    this.url = url,
+    this.url = new URL(url, BACKEND_URL),
     this.from = range.from,
     this.to = range.to,
     this.label = label;
@@ -48,28 +50,30 @@ export default class ColumnChart {
     `;
     return div.firstElementChild;
   }
+
   async update(from = Date.now() - Date.now().setMonth(Date.now().getMonth() - 1), to = Date.now()) {
     this.element.classList.add('column-chart_loading');
-    try {
-      const response = await fetch(`https://course-js.javascript.ru/${this.url}?from=${from}&to=${to},`);
-      this.dataJson = await response.json();
-    } catch (error) {
-      //console.warn(`Проблема с запросом на сервер: https://course-js.javascript.ru/${this.url}?from=${this.from}&to=${this.to}`);
-    }
+
+    this.url.searchParams.set(`from`, from.toString());
+    this.url.searchParams.set(`to`, to.toString());
+    this.dataJson = await fetchJson(this.url);
+
     const data = Object.values(this.dataJson);
-    const maxValue = Math.max(...data);
     this.value = data.reduce((sum, current) => sum + current, 0);
     this.subElements.header.innerHTML = (this.formatHeading) ? this.formatHeading(this.value) : this.value;
+    this.subElements.body.innerHTML = this.updateBody(data);
 
+    if (data.length) {this.element.classList.remove('column-chart_loading');}
+  }
+
+  updateBody(data) {
+    const maxValue = Math.max(...data);
     const scale = this.chartHeight / maxValue;
-    this.subElements.body.innerHTML = data.map(columnHeight => {
+    return data.map(columnHeight => {
       const value = Math.floor(columnHeight * scale);
       const percent = (columnHeight / maxValue * 100).toFixed(0);
       return `<div style="--value:${value}" data-tooltip="${percent}%"></div>`;
     }).join('');
-
-    if (data.length) {this.element.classList.remove('column-chart_loading');}
-
   }
 
   getSubElements(element) {

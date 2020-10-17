@@ -24,7 +24,7 @@ export default class SortableTable {
 
    tryToAddRows = async () => {
      let windowRelativeBottom = document.documentElement.getBoundingClientRect().bottom;
-     if ((windowRelativeBottom <= document.documentElement.clientHeight + 100) && !this.isLoading) {
+     if ((windowRelativeBottom <= document.documentElement.clientHeight + 100) && !this.isLoading && !this.isSortLocally) {
        this.isLoading = true;
        await this.addRows();
        this.isLoading = false;
@@ -49,7 +49,7 @@ export default class SortableTable {
      const id = sorted.id;
      const order = sorted.order;
      this.isSortLocally = isSortLocally;
-     this.url = url;
+     this.url = new URL(url, BACKEND_URL),
      this.headersConfig = headersConfig;
      this.render(id, order);
    }
@@ -103,12 +103,20 @@ export default class SortableTable {
    async addRows() {
      this.start += 30;
      this.end += 30;
-     const sortedData = await fetchJson(`${BACKEND_URL}/${this.url}?_embed=subcategory.category&_sort=${this.sorted.id}&_order=${this.sorted.order}&_start=${this.start}&_end=${this.end}`);
+     const {id, order} = this.sorted;
+     const sortedData = await fetchJson(this.urlWithAllSearchParams(id, order));
      this.subElements.body.insertAdjacentHTML("beforeend", this.getTableRows(sortedData));
    }
 
    async sortOnServer(id = this.defaultId, order = this.defaultOrder) {
-     return fetchJson(`${BACKEND_URL}/${this.url}?_embed=subcategory.category&_sort=${id}&_order=${order}&_start=${this.start}&_end=${this.end}`);
+     return fetchJson(this.urlWithAllSearchParams(id, order));
+   }
+   urlWithAllSearchParams(id, order, start = this.start, end = this.end) {
+     this.url.searchParams.set(`_sort`, id);
+     this.url.searchParams.set(`_order`, order);
+     this.url.searchParams.set(`_start`, start);
+     this.url.searchParams.set(`_end`, end);
+     return this.url;
    }
 
    sortLocally(field, order) {
