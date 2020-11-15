@@ -192,3 +192,22 @@ body {
     background-position: -100%;
   }
 }
+
+/* Button clear filters */
+
+.button-primary-outline {
+  color: var(--blue);
+  background-color: var(--white);
+}
+.button-primary, .button-primary-outline {
+  outline: none;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  padding: 6px 34px;
+  border: 1px solid var(--blue);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.2s all;
+  text-decoration: none;
+}

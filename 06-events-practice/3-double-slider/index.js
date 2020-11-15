@@ -4,7 +4,7 @@ export default class DoubleSlider {
   leftThumb; // HTMLElement;
   rightThumb; // HTMLElement;
   sliderWidth;//Num
-  sliderLeft;
+  sliderLeftTab;
   sliderProgress; // HTMLElement;
   dragging; //current thumb
 
@@ -15,29 +15,26 @@ export default class DoubleSlider {
   formatValue; //function
   selected;
 
-
-
-
   onMouseDown = event => {
     this.getInitialPosition();
     event.preventDefault();
 
-    let leftThumbFromEvent = event.target.closest('.range-slider__thumb-left');
+    const leftThumbFromEvent = event.target.closest('.range-slider__thumb-left');
     if (leftThumbFromEvent === this.leftThumb) {
       this.dragging = this.leftThumb;
       const { right } = this.dragging.getBoundingClientRect();
       this.shiftX = right - event.clientX;
-      this.element.classList.add('range-slider_dragging');
+      document.body.classList.add('range-slider_dragging');
       document.addEventListener('pointermove', this.onMouseMove);
       document.addEventListener('pointerup', this.onMouseUp);
     }
 
-    let rightThumbFromEvent = event.target.closest('.range-slider__thumb-right');
+    const rightThumbFromEvent = event.target.closest('.range-slider__thumb-right');
     if (rightThumbFromEvent) {
       this.dragging = this.rightThumb;
       const { left } = this.dragging.getBoundingClientRect();
       this.shiftX = left - event.clientX;
-      this.element.classList.add('range-slider_dragging');
+      document.body.classList.add('range-slider_dragging');
       document.addEventListener('pointermove', this.onMouseMove);
       document.addEventListener('pointerup', this.onMouseUp);
     }
@@ -45,7 +42,7 @@ export default class DoubleSlider {
   onMouseMove = event => {
 
     if (this.dragging === this.leftThumb) {
-      let newLeft = (event.clientX - this.sliderLeft + this.shiftX) / this.sliderWidth;
+      let newLeft = (event.clientX - this.sliderLeftTab + this.shiftX) / this.sliderWidth;
 
       if (newLeft < 0) {
         newLeft = 0;
@@ -67,7 +64,7 @@ export default class DoubleSlider {
 
     if (this.dragging === this.rightThumb) {
 
-      let newRight = (this.sliderRight - event.clientX - this.shiftX) / this.sliderWidth;
+      let newRight = (this.sliderRightTab - event.clientX - this.shiftX) / this.sliderWidth;
 
       if (newRight < 0) {
         newRight = 0;
@@ -88,16 +85,17 @@ export default class DoubleSlider {
     }
   };
   onMouseUp = () => {
+    const {from, to} = this.selected;
     const customEvent = new CustomEvent('range-select', {
       bubbles: true,
       detail: {
-        from: this.selected.from,
-        to: this.selected.to
+        from,
+        to
       }
     });
 
     this.element.dispatchEvent(customEvent);
-    this.element.classList.remove('range-slider_dragging');
+    document.body.classList.remove('range-slider_dragging');
     this.removeListeners();
   };
 
@@ -128,8 +126,8 @@ export default class DoubleSlider {
 
   getInitialPosition() {
     this.sliderInner = this.element.querySelector('.range-slider__inner');
-    this.sliderLeft = this.sliderInner.getBoundingClientRect().left;
-    this.sliderRight = this.sliderInner.getBoundingClientRect().right;
+    this.sliderLeftTab = this.sliderInner.getBoundingClientRect().left;
+    this.sliderRightTab = this.sliderInner.getBoundingClientRect().right;
     this.sliderWidth = this.sliderInner.getBoundingClientRect().width;
     this.sliderProgress = this.element.querySelector('.range-slider__progress');
     this.spanFrom = this.element.querySelector('[data-element="from"]');

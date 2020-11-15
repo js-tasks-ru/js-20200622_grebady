@@ -35,6 +35,7 @@ export default class NotificationMessage {
   render() {
     this.element = this.template;
   }
+
   show(parentElement = document.body) {
     parentElement.append(this.element);
     setTimeout(() => this.remove(), this.duration);
